@@ -5,7 +5,7 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<link rel="icon" href="data:;base64,iVBORw0KGgo=">
-		<title>mycvc</title>
+		<title>sliver6</title>
 		<style>
 			.buttons {
 				position: absolute;
@@ -34,10 +34,8 @@
 		<script src="static/js/jquery.min.js"></script>
 		<script src="static/js/aframe.min.js"></script>
 		<script src="static/js/aframe-ar.js"></script>
-		<!-- <script src="static/js/makem.js"></script> -->
 		<script src="static/js/ar2.js"></script>
-			<script src="static/js/artoolkit.min.js"></script>
-			<!-- <script src="static/js/makem.js"></script> -->
+		<!-- <script src="static/js/artoolkit.min.js"></script> -->
 		<script>
 			var charArr = [];
 			var charArr2 = ['fl', 'pl', 'cl', 'fr', 'sn', 'tw', 'tr', 'gr', 'dr']
@@ -72,8 +70,8 @@
 								// 往maker里添加图片实体
 								let el = document.createElement('a-image');
 								el.setAttribute('id', "desc")
-								el.setAttribute('src', "static/pic_letter/a.png")
-								el.setAttribute('rotation', "90 0 0")
+								el.setAttribute('src', "static/pic_letter/s_"+ char +".png")
+								el.setAttribute('rotation', "270 180 180")
 								el.setAttribute('position', "0 0 -1.5")
 								markerEl.appendChild(el);
 
@@ -83,6 +81,7 @@
 									// markerVisible[ marker.id ] = true;
 									let marker1Pos = new THREE.Vector3();
 									// 录入放置的位置。
+									console.log('识别到的是:',mark_index,charArr[mark_index])
 									charIndexArr[mark_index] = markerEl.object3D.getWorldPosition(marker1Pos).x
 									// console.log(charIndexArr)
 									if(answer){
@@ -142,8 +141,8 @@
 								// 往maker里添加图片实体
 								let el = document.createElement('a-image');
 								el.setAttribute('id', "desc")
-								el.setAttribute('src', "static/pic_letter/a.png")
-								el.setAttribute('rotation', "90 0 0")
+								el.setAttribute('src', "static/pic_letter/s_"+char+".png")
+								el.setAttribute('rotation', "270 180 180")
 								el.setAttribute('position', "0 0 -1.5")
 								markerEl.appendChild(el);
 					
@@ -172,7 +171,7 @@
 						entityEl.setAttribute('markerhandler', '');
 						entityEl.setAttribute('id', 'marker' + mIdex);
 						entityEl.setAttribute('type', 'pattern');
-						entityEl.setAttribute('url', 'static/pattern/pattern-small_a.patt');
+						entityEl.setAttribute('url', 'static/pattern/pattern-' + char + '.patt');
 						entityEl.setAttribute('smooth', 'true');
 						entityEl.setAttribute('smoothCount', '10');
 						entityEl.setAttribute('smoothTolerance', '.10');
@@ -199,7 +198,6 @@
 								console.log('存在多余字母')
 							}
 						}
-						
 					}
 					//值都存在
 					if(a!=0&&b!=0&&c!=0&&status==0){
@@ -252,7 +250,6 @@
 				}else{
 					index=random(0, array.length); //生成一个从最小值为0 最大值为数组长度的随机数
 				}
-				// console.log( array.splice(index, 1)[0]);
 				return array.splice(index, 1)[0]
 			}
 			
@@ -286,13 +283,6 @@
 					<source src="static/audio/cl_a_p.mp3" type="audio/mpeg">
 				</audio>
 			</a-assets>
-			<!-- example -->
-			<!-- <a-marker id="marker4" markerhandler type="pattern" url="static/pattern/pattern-small_d.patt" smooth="true"
-				smoothCount="10" smoothTolerance=".10" smoothThreshold="5" minConfidence="0.99">
-				<a-image id="desc" src="#s_d" rotation="-90 0 0" position="0 0 -2.5"></a-image>
-			</a-marker> -->
-
-			
 			<a-entity camera></a-entity>
 		</a-scene>
 	</body>
