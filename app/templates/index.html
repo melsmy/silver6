@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>gold2</title>
+	<script src="static/aframe.min.js"></script>
+	<!-- <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script> -->
+	<script src="static/jquery.min.js"></script>
+	<style>
+			body {
+				clear: both;
+				background-color: #dfe4eb;
+			}
+	
+			.container {
+				position: absolute;
+				width: 100%;
+				left: 50%;
+				top: 50%;
+				transform: translate(-50%, -50%);
+				-ms-transform: translate(-50%, -50%);
+				z-index: 1000;
+				visibility: visible;
+			}
+	
+			.btn {
+				--bg-color: #e5e5e5;
+				--font-color: #333;
+				position: absolute;
+				left: 50%;
+				top: 0;
+				transform: translate(-50%, -50%);
+				-ms-transform: translate(-50%, -50%);
+				border-radius: 5px;
+				padding: 16px 30px;
+				text-align: center;
+				cursor: pointer;
+				text-decoration: none;
+				color: black;
+				background-color: #e5e5e5;
+				font-size: 40px;
+				border: 0;
+				box-shadow: inset 2px 2px 2px 0px rgb(255 255 255 / 50%), 7px 7px 20px 0px rgb(0 0 0 / 10%), 4px 4px 5px 0px rgb(0 0 0 / 10%);
+				transition: all 600ms ease-out;
+				/* 以下为核心代码 */
+				background-size: 200% 100%;
+				background-position: right bottom;
+				background-image: linear-gradient(to right, var(--font-color) 50%, var(--bg-color) 50%);
+			}
+	
+			.btn:hover {
+				color: white;
+				background-position: left bottom;
+			}
+	
+			.tips {
+				display: none;
+				z-index: 1000;
+				position: absolute;
+				left: 50%;
+				top: 45%;
+				transform: translate(-50%, -50%);
+				-ms-transform: translate(-50%, -50%);
+				/* width: 150px; */
+				/* height: 150px; */
+				background-color: white;
+				font-size: 35px;
+				padding: 10px;
+				background-color: fff;
+				border-radius: 10px;
+				color: #333;
+			}
+		</style>
+	</head>
+<body>
+	<a-scene id="mainscene" visible="false">
+		<a-assets>
+		
+			<img id="bg" crossorigin="anonymous" src="static/g2g2.png">
+			<img id="start" crossorigin="anonymous" src="static/start.png">
+			<img id="star" crossorigin="anonymous" src="static/star.png">
+			<img id="arrow" crossorigin="anonymous" src="static/arrow.png">
+			<img id="correct" crossorigin="anonymous" src="static/correct.png">
+			<img id="wrong" crossorigin="anonymous" src="static/wrong.png">
+		</a-assets>
+		<!-- bg -->
+		<!-- position:2 0.6 0.5 -->
+		<a-sky src="#bg" radius="15" position="" rotation="0 0 0"></a-sky>
+		<!-- objs -->
+		<a-entity class="bathtub" position="0 -0.4 5" rotation="0 0 0"  visible="false"
+			 canvas-updater>
+			<a-image class="link" src="#star" width="2" height="1"></a-image>
+		</a-entity>
+		<a-entity class="bathtub_select" position="0 -0.7 5" rotation="0 0 180" visible="false"
+			 canvas-updater>
+			<a-image src="#arrow" width="2" height="2"></a-image>
+		</a-entity>
+		<a-entity class="bathtub_check" position="0 -0.3 4.9" rotation="0 -180 0" visible="false"
+			canvas-updater>
+			<a-image src="#correct" width=".8" height=".8"></a-image>
+		</a-entity>
+		
+		<a-entity class="mirror" position="-5 2.7 1.2" rotation="0 100 -180" visible="false"
+			 canvas-updater>
+			<a-image class="link" src="#star" width="2" height="1.1"></a-image>
+		</a-entity>
+		<a-entity class="mirror_select" position="-5 2.3 1.2" rotation="0 100 -180" visible="false"
+			 canvas-updater>
+			<a-image src="#arrow" width="2" height="2"></a-image>
+		</a-entity>
+		<a-entity class="mirror_check" position="-5 2.7 1.2" rotation="0 100 0" visible="false"
+			 canvas-updater>
+			<a-image src="#correct" width=".6" height=".6"></a-image>
+		</a-entity>
+		
+		<a-entity class="mop" position="5 0.4 -5" rotation="0 90 -180" visible="false"
+			 canvas-updater>
+			<a-image class="link" src="#star" width="2" height="1"></a-image>
+		</a-entity>
+		<a-entity class="mop_select" position="5 0 -5" rotation="0 90 -180" visible="false"
+			 canvas-updater>
+			<a-image src="#arrow" width="2" height="2"></a-image>
+		</a-entity>
+		<a-entity class="mop_check" position="5 0.4 -5" rotation="0 -90 0" visible="false"
+			 canvas-updater>
+			<a-image src="#correct" width="1" height="1"></a-image>
+		</a-entity>
+		
+		<a-entity class="pail" position="5 -3.6 -3" rotation="0 90 -180" visible="false"
+			 canvas-updater>
+			<a-image class="link" src="#star" width="2" height="1"></a-image>
+		</a-entity>
+		<a-entity class="pail_select" position="5 -4 -3" rotation="0 90 -180" visible="false"
+			 canvas-updater>
+			<a-image src="#arrow" width="2" height="2"></a-image>
+		</a-entity>
+		<a-entity class="pail_check" position="5 -3.6 -3" rotation="0 -90 0" visible="false"
+			 canvas-updater>
+			<a-image src="#correct" width=".8" height=".8"></a-image>
+		</a-entity>
+		
+		<a-entity class="soap" position="-2.6 -0.15 5" rotation="0 -5 0" visible="false"
+			 canvas-updater>
+			<a-image class="link" src="#star" width="1.8" height="1"></a-image>
+		</a-entity>
+		<a-entity class="soap_select" position="-2.6 -0.5 5" rotation="0 -5 180" visible="false"
+			 canvas-updater>
+			<a-image src="#arrow" width="1.8" height="1.8"></a-image>
+		</a-entity>
+		<a-entity class="soap_check" position="-2.6 -0.15 5" rotation="0 175 0" visible="false"
+			 canvas-updater>
+			<a-image src="#correct" width=".6" height=".6"></a-image>
+		</a-entity>
+		
+		<!-- startBtn -->
+		<a-entity position="-0.8 1.2 -5" rotation="0 0 0" start-btn>
+			<a-text value="Press here" width="6" position="-0.6 0.6 0" color="#fff">
+			</a-text>
+			<a-entity class="start" event-set__mouseenter="scale: 1.2 1.2 1" event-set__mouseleave="scale: 1 1 1"
+				canvas-updater>
+				<a-image class="link" src="#start" width=".8" height=".8"></a-image>
+			</a-entity>
+		</a-entity>
+		<!-- text -->
+		<a-box color="grey" width="2.2" height="2.6" position="0.9 0.8 -5" rotation="0 0 0" opacity="0.3"
+			depth="0.001">
+			<a-text id="res-count" value="Result(0/5)" width="6" position="-0.75 1 0" rotation="0 0 0" color="#fff">
+			</a-text>
+			<a-entity class="bathtub-text" position="-1 0.6 0" visible='false'>
+				<a-image class="checkImg" src="#wrong" width="0.3" height="0.3" position="1.7 0 0"></a-image>
+				<a-text color="#fff" align="left" baseline="center" wrap-count="30" value="bathtub">
+				</a-text>
+			</a-entity>
+			<a-entity class="mirror-text" position="-1 0.2 0" visible='false'>
+				<a-image class="checkImg" src="#wrong" width="0.3" height="0.3" position="1.7 0 0"></a-image>
+				<a-text color="#fff" align="left" baseline="center" wrap-count="30" value="mirror">
+				</a-text>
+			</a-entity>
+			<a-entity class="mop-text" position="-1 -0.2 0" visible='false'>
+				<a-image class="checkImg" src="#wrong" width="0.3" height="0.3" position="1.7 0 0"></a-image>
+				<a-text color="#fff" align="left" baseline="center" wrap-count="30" value="mop"></a-text>
+			</a-entity>
+			<a-entity class="pail-text" position="-1 -0.6 0" visible='false'>
+				<a-image class="checkImg" src="#wrong" width="0.3" height="0.3" position="1.7 0 0"></a-image>
+				<a-text color="#fff" align="left" baseline="center" wrap-count="30" value="pail">
+				</a-text>
+			</a-entity>
+			<a-entity class="soap-text" position="-1 -1 0" visible='false'>
+				<a-image class="checkImg" src="#wrong" width="0.3" height="0.3" position="1.7 0 0"></a-image>
+				<a-text color="#fff" align="left" baseline="center" wrap-count="30" value="soap">
+				</a-text>
+			</a-entity>
+		</a-box>
+		
+		<!-- Camera + cursor. -->
+		<a-entity>
+			<a-entity camera look-controls wasd-controls id="camera">
+				<a-entity position="0 0 -3"
+					animation__click="property: scale; startEvents: click; easing: easeInCubic; dur: 150; from: 1 1 1; to: 1 1 1"
+					animation__fusing="property: scale; startEvents: fusing; easing: easeInCubic; dur: 5500; from: 1 1 1; to: 10 10 10"
+					animation__mouseleave="property: scale; startEvents: mouseleave; easing: easeInCubic; dur: 500; to: 1 1 1"
+					geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03;"
+					material="color: black; shader: flat" cursor="maxDistance: 30; fuse: true; fuseTimeout:5500"
+					raycaster="objects: .link">
+				</a-entity>
+			</a-entity>
+		</a-entity>
+		<!-- end scene -->
+	</a-scene>
+	<audio preload controls id="sound" visible="false">
+		<source src="static/gold_2.mp3" type="audio/mpeg">
+		<source src="static/gold_2.ogg" type="audio/ogg">
+	</audio>
+	<div class="container" >
+		<button class="btn">Start</button>
+	</div>
+	<div class="tips">
+		Please click <img width="35" src="static/start.png"> first >>>
+	</div>
+	<script>
+		var words = ["bathtub","mirror","mop","pail","soap"]
+		// var dur = [4, 7, 9.3, 11.5, 14.2]
+		var end = 16.2
+		var aobj ={
+			'bathtub':[4.2,6.3],
+			'mirror':[7,8.5],
+			'mop':[9.5,11.0],
+			'pail':[11.6,13],
+			'soap':[14.2,16]
+		}
+		let index = 0
+		let answer = ''
+		var flag = 0
+		var a =document.getElementById('sound');
+		AFRAME.registerComponent('start-btn', {
+			schema: {
+				target: {
+					type: 'selector'
+				},
+				
+			},
+			init: function() {
+				var data = this.data;
+				var el = this.el;
+				var _timer;
+				el.addEventListener("mouseenter", function() {
+					if (_timer) {
+						clearTimeout(_timer);
+					}
+					_timer = setTimeout(function() {
+						// 选对才播放下一个 
+						if (flag) {
+							index++;
+						}
+						let word = words[index]
+						a.currentTime = aobj[word][0]
+						a.play();
+						answer = words[index]
+						console.log('answer=', answer,index,word);
+						flag = 0;
+						
+						let dur =Math.ceil((aobj[word][1] - aobj[word][0]) *1000) 
+						setTimeout(function() {
+							a.pause()
+						}, dur)
+					}, 5500);
+				});
+				el.addEventListener("mouseleave", function() {
+					if (_timer) {
+						clearTimeout(_timer);
+						_timer = null;
+					}
+				});
+			}
+		});
+		function sceneInit(){
+			var answer_timer;
+			for (i in words) {
+				var el =document.getElementsByClassName(words[i])[0]
+				el.addEventListener('mouseenter',function(e){
+					let _this = this
+					let className = _this.className
+					let _select = document.getElementsByClassName(className+'_select')[0]
+					let _check = document.getElementsByClassName(className+'_check')[0]
+					let u_answer = className
+					_select.setAttribute("visible", true);
+				
+					if (answer_timer) {
+						clearTimeout(answer_timer);
+					}
+					answer_timer = setTimeout(function() {
+							if (answer != '') {
+								var text_el = document.getElementsByClassName(answer+'-text')[0]
+								// 显示答案
+								if (!document.getElementsByClassName(answer+'-text')[0].getAttribute('visible')) {
+									document.getElementsByClassName(answer+'-text')[0].setAttribute('visible', "true")
+								}
+								if (u_answer === answer) {
+									//更改符号
+									text_el.children[0].setAttribute('src', "#correct")
+									_check.children[0].setAttribute('src', "#correct")
+									_check.setAttribute("visible", true)
+									sound.currentTime = 0
+									sound.play();
+									setTimeout(function() {
+										sound.pause()
+										// todo 改成特效？
+										if (index+1 == words.length) {
+											alert('You have completed this course！');
+											document.getElementsByClassName('btn')[0].innerHTML="Learn again!",
+											document.getElementById('mainscene').setAttribute('visible', 'false')
+											document.getElementById('sound').style.display="none"
+											clearScene()
+											$('.container').show()
+										}
+									}, 1500)
+									console.log('right')
+									// 取消跟踪
+									_this.children[0].classList.remove("link")
+									flag = 1;
+									let count = parseInt(index+1)
+									document.getElementById('res-count').setAttribute("value", "Result(" + count + "/5)")
+									// 标记：答对之后，开始下一题之前，不要再播放错误音频
+									answer = ''
+								} else {
+									let word = words[index]
+									console.log('wrong',word)
+									flag = 0;
+									sound.currentTime = 2
+									sound.play();
+									_check.children[0].setAttribute('src', "#wrong")
+									_check.setAttribute("visible", true)
+									
+									let dur =Math.ceil((aobj[word][1] - aobj[word][0]) *1000) 
+									setTimeout(function() {
+										sound.pause()
+										sound.currentTime = aobj[word][0]
+										sound.play();
+										setTimeout(function() {
+											sound.pause()
+										}, dur)
+									}, 1500)
+								}
+							} else {
+								if (answer == '') {
+									$('.tips').show(300)
+								}
+							}
+						}, 5500);
+					
+					
+				})
+				
+				el.addEventListener('mouseleave', function(event){
+					
+					let _this = this;
+					_this.setAttribute("visible", false);
+					let obj_name = _this.className
+						document.getElementsByClassName(obj_name+'_select')[0].setAttribute('visible', "false")
+					// // 有镜头追踪时候才隐藏
+					if (_this.children[0].classList.contains('link')) {
+						document.getElementsByClassName(obj_name+'_check')[0].setAttribute('visible', "false")
+					}
+					$('.tips').hide(300)
+					if (answer_timer) {
+						clearTimeout(answer_timer);
+						answer_timer = null;
+					}
+				
+				});
+			}
+		}
+		sceneInit()
+		
+		document.getElementsByClassName('btn')[0].addEventListener('click',function(){
+			var _this = this
+			// this.parentNode.style.visibility="hidden";
+			$('.container').hide()
+			document.getElementById('mainscene').setAttribute('visible', "true")
+			document.getElementById('mainscene').style.display='block'
+			sound.play();
+			sound.pause();
+			sound.currentTime = end;
+			// alert(sound.currentTime)
+			sound.play();
+		})
+		
+		$(document).ready(function() {
+			document.getElementById('res-count').setAttribute("value", "Result(0/" + words.length + ")")
+		});
+		function clearScene() {
+			for (i in words) {
+				let el = $('.' + words[i]).children(':first')
+				index = 0
+				answer = ''
+				flag = 0
+				document.getElementById('res-count').setAttribute("value", "Result(0/" + words.length + ")")
+				// // hide tips
+				$('.tips').hide();
+				// //hide answer
+				document.getElementsByClassName(words[i] + '-text')[0].setAttribute('visible', "false")
+				$('.' + words[i] + '-text').find('.checkImg')[0].setAttribute('src', "#wrong")
+				// //追加跟踪
+				if (!el.hasClass('link')) {
+					el.addClass('link')
+				}
+				$('.' + words[i] + '_select')[0].setAttribute('visible', "false")
+				$('.' + words[i] + '_check')[0].setAttribute('visible', "false")
+			}
+		}
+	</script>
+</body>
+</html>
