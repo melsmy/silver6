@@ -39,7 +39,7 @@
 		<script>
 			var charArr = [];
 			var charArr2 = ['fl', 'pl', 'cl', 'fr', 'sn', 'tw', 'tr', 'gr', 'dr']
-			var charIndexArr = new Array(26).fill(0); //存放位置
+			var charIndexArr = new Array(35).fill(0); //存放位置
 			var mIdex = 0; //marker_index
 			var jsondata;
 			var question = {}
@@ -77,7 +77,6 @@
 
 								// 识别成功时执行
 								markerEl.addEventListener('markerFound', function() {
-									
 									// markerVisible[ marker.id ] = true;
 									let marker1Pos = new THREE.Vector3();
 									// 录入放置的位置。
@@ -129,7 +128,7 @@
 						let char = charArr2[j]
 						// console.log(char)
 						let entityEl = document.createElement('a-marker');
-						mIdex = mIdex + 1; //marker_index
+						
 						charArr.push(char);
 						// 坑！！！注册组件最好写在scene之前不然也不太会执行啦。
 						AFRAME.registerComponent('marker' + mIdex, {
@@ -137,7 +136,11 @@
 								// This will be called after the entity has properly attached and loaded.
 								var markerId = this.el.id;
 								let markerEl = this.el;
-								// console.log(markerEl)
+								let mark_index =  markerId.substring(markerId.length - 2)
+								if(!Number(mark_index)){
+									mark_index = markerId.charAt(markerId.length - 1)
+								}
+								console.log(mark_index,markerId)
 								// 往maker里添加图片实体
 								let el = document.createElement('a-image');
 								el.setAttribute('id', "desc")
@@ -149,12 +152,23 @@
 								// 找到or识别成功时执行
 								markerEl.addEventListener('markerFound', function() {
 									// markerVisible[ marker.id ] = true;
-									console.log('yes')
+									let marker1Pos = new THREE.Vector3();
+									// 录入放置的位置。
+									console.log('识别到的是:',markerEl)
+									charIndexArr[mark_index] = markerEl.object3D.getWorldPosition(marker1Pos).x
+									console.log(charIndexArr)
+									if(answer){
+										checkAnswer(charIndexArr[answer[0]],charIndexArr[answer[1]],charIndexArr[answer[2]])
+									}
 								});
 								// 离开镜头时执行
 								markerEl.addEventListener('markerLost', function() {
 									// markerVisible[ marker.id ] = false;
+									charIndexArr[mark_index] = 0
 									console.log('markerLost')
+									if(answer){
+										checkAnswer(charIndexArr[answer[0]],charIndexArr[answer[1]],charIndexArr[answer[2]])
+									}
 								});
 							},
 						});
@@ -178,6 +192,7 @@
 						entityEl.setAttribute('smoothThreshold', '5');
 						entityEl.setAttribute('minConfidence', '0.99');
 						sceneEl.appendChild(entityEl);
+						mIdex = mIdex + 1; //marker_index
 					}
 				
 				// end
@@ -190,12 +205,12 @@
 					// 其他字母的x要为空，即不要存在非答案以外的字母
 					for(i in charIndexArr){
 						if(i==answer[0]||i==answer[1]||i==answer[2]){
-							
+							continue
 						}else{
 							if(charIndexArr[i]!=0){
 								status = 1
 								document.getElementById("table1").style.visibility = "hidden";
-								console.log('存在多余字母')
+								console.log('存在多余字母',charArr[i])
 							}
 						}
 					}
@@ -208,7 +223,7 @@
 						}
 					}else{
 						document.getElementById("table1").style.visibility = "hidden";
-						console.log('错误')
+						console.log('错误',a,b,c)
 					}
 				}
 			}
