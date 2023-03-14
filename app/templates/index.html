@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh">
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="icon" href="data:;base64,iVBORw0KGgo=">
+		<title>sliver6</title>
+		<style>
+			.buttons {
+				position: absolute;
+				bottom: 50px;
+				left: 0;
+				width: 100%;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				z-index: 10;
+				visibility: visible;
+			}
+		
+			.tables {
+				position: absolute;
+				bottom: 100px;
+				left: 0;
+				width: 100%;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				z-index: 10;
+				visibility: hidden;
+			}
+		</style>
+		<script src="static/js/jquery.min.js"></script>
+		<script src="static/js/aframe.min.js"></script>
+		<script src="static/js/aframe-ar.js"></script>
+		<script src="static/js/ar2.js"></script>
+		<!-- <script src="static/js/artoolkit.min.js"></script> -->
+		<script>
+			var charArr = [];
+			var charArr2 = ['fl', 'pl', 'cl', 'fr', 'sn', 'tw', 'tr', 'gr', 'dr']
+			var charIndexArr = new Array(35).fill(0); //存放位置
+			var mIdex = 0; //marker_index
+			var jsondata;
+			var question = {}
+			var qNo = [0,1,2]
+			var setno;
+			
+			window.onload = function() {
+				var sceneEl = document.querySelector('a-scene');
+				function initScene() {
+					// 26字母
+					for (var i = 0; i < 26; i++) {
+						let char = (String.fromCharCode((65 + i))).toLowerCase()
+						let entityEl = document.createElement('a-marker');
+
+						charArr.push(char);
+						// 坑！！！注册组件最好写在scene之前不然也不太会执行啦。
+						AFRAME.registerComponent('marker' + mIdex, {
+							init: function() {
+								// This will be called after the entity has properly attached and loaded.
+								let markerId = this.el.id;
+								let markerEl = this.el;
+								let mark_index =  markerId.substring(markerId.length - 2)
+								if(!Number(mark_index)){
+									mark_index = markerId.charAt(markerId.length - 1)
+									
+								}
+								// console.log(markerEl)
+								// 往maker里添加图片实体
+								let el = document.createElement('a-image');
+								el.setAttribute('id', "desc")
+								el.setAttribute('src', "static/pic_letter/s_"+ char +".png")
+								el.setAttribute('rotation', "270 180 180")
+								el.setAttribute('position', "0 0 -1.5")
+								markerEl.appendChild(el);
+
+								// 识别成功时执行
+								markerEl.addEventListener('markerFound', function() {
+									// markerVisible[ marker.id ] = true;
+									let marker1Pos = new THREE.Vector3();
+									// 录入放置的位置。
+									console.log('识别到的是:',mark_index,charArr[mark_index])
+									charIndexArr[mark_index] = markerEl.object3D.getWorldPosition(marker1Pos).x
+									// console.log(charIndexArr)
+									if(answer){
+										checkAnswer(charIndexArr[answer[0]],charIndexArr[answer[1]],charIndexArr[answer[2]])
+									}
+									
+									
+								});
+								// 离开时执行
+								markerEl.addEventListener('markerLost', function() {
+									// markerVisible[ marker.id ] = false;
+									charIndexArr[mark_index] = 0
+									console.log('markerLost')
+									if(answer){
+										checkAnswer(charIndexArr[answer[0]],charIndexArr[answer[1]],charIndexArr[answer[2]])
+									}
+								});
+							},
+						});
+
+						AFRAME.registerComponent(char + '_img', {
+							init: function() {
+								let img = this.el;
+								console.log(img, img.getAttribute('position'))
+								// img = Attribute('position')
+								// img.setAttribute('position', "0 0.5 0");
+							},
+						});
+						entityEl.setAttribute('marker' + mIdex, '');
+						entityEl.setAttribute('markerhandler', '');
+						entityEl.setAttribute('id', 'marker' + mIdex);
+						entityEl.setAttribute('type', 'pattern');
+						entityEl.setAttribute('url', 'static/pattern/pattern-small_' + char + '.patt');
+						entityEl.setAttribute('smooth', 'true');
+						entityEl.setAttribute('smoothCount', '10');
+						entityEl.setAttribute('smoothTolerance', '.10');
+						entityEl.setAttribute('smoothThreshold', '5');
+						entityEl.setAttribute('minConfidence', '0.99');
+						sceneEl.appendChild(entityEl);
+						mIdex = i + 1; //marker_index
+					}
+					
+					// 额外字母
+					for (var j = 0; j < charArr2.length; j++) {
+						let char = charArr2[j]
+						// console.log(char)
+						let entityEl = document.createElement('a-marker');
+						
+						charArr.push(char);
+						// 坑！！！注册组件最好写在scene之前不然也不太会执行啦。
+						AFRAME.registerComponent('marker' + mIdex, {
+							init: function() {
+								// This will be called after the entity has properly attached and loaded.
+								var markerId = this.el.id;
+								let markerEl = this.el;
+								let mark_index =  markerId.substring(markerId.length - 2)
+								if(!Number(mark_index)){
+									mark_index = markerId.charAt(markerId.length - 1)
+								}
+								console.log(mark_index,markerId)
+								// 往maker里添加图片实体
+								let el = document.createElement('a-image');
+								el.setAttribute('id', "desc")
+								el.setAttribute('src', "static/pic_letter/s_"+char+".png")
+								el.setAttribute('rotation', "270 180 180")
+								el.setAttribute('position', "0 0 -1.5")
+								markerEl.appendChild(el);
+					
+								// 找到or识别成功时执行
+								markerEl.addEventListener('markerFound', function() {
+									// markerVisible[ marker.id ] = true;
+									let marker1Pos = new THREE.Vector3();
+									// 录入放置的位置。
+									console.log('识别到的是:',markerEl)
+									charIndexArr[mark_index] = markerEl.object3D.getWorldPosition(marker1Pos).x
+									console.log(charIndexArr)
+									if(answer){
+										checkAnswer(charIndexArr[answer[0]],charIndexArr[answer[1]],charIndexArr[answer[2]])
+									}
+								});
+								// 离开镜头时执行
+								markerEl.addEventListener('markerLost', function() {
+									// markerVisible[ marker.id ] = false;
+									charIndexArr[mark_index] = 0
+									console.log('markerLost')
+									if(answer){
+										checkAnswer(charIndexArr[answer[0]],charIndexArr[answer[1]],charIndexArr[answer[2]])
+									}
+								});
+							},
+						});
+					
+						AFRAME.registerComponent(char + '_img', {
+							init: function() {
+								let img = this.el;
+								console.log(img, img.getAttribute('position'))
+								// img = Attribute('position')
+								// img.setAttribute('position', "0 0.5 0");
+							},
+						});
+						entityEl.setAttribute('marker' + mIdex, '');
+						entityEl.setAttribute('markerhandler', '');
+						entityEl.setAttribute('id', 'marker' + mIdex);
+						entityEl.setAttribute('type', 'pattern');
+						entityEl.setAttribute('url', 'static/pattern/pattern-' + char + '.patt');
+						entityEl.setAttribute('smooth', 'true');
+						entityEl.setAttribute('smoothCount', '10');
+						entityEl.setAttribute('smoothTolerance', '.10');
+						entityEl.setAttribute('smoothThreshold', '5');
+						entityEl.setAttribute('minConfidence', '0.99');
+						sceneEl.appendChild(entityEl);
+						mIdex = mIdex + 1; //marker_index
+					}
+				
+				// end
+				}
+				
+				initScene()
+				function checkAnswer(a,b,c){
+					var status = 0;
+					// console.log(a,b,c,answer)
+					// 其他字母的x要为空，即不要存在非答案以外的字母
+					for(i in charIndexArr){
+						if(i==answer[0]||i==answer[1]||i==answer[2]){
+							continue
+						}else{
+							if(charIndexArr[i]!=0){
+								status = 1
+								document.getElementById("table1").style.visibility = "hidden";
+								console.log('存在多余字母',charArr[i])
+							}
+						}
+					}
+					//值都存在
+					if(a!=0&&b!=0&&c!=0&&status==0){
+						//位置正确
+						if(b>a&&c>b){
+							document.getElementById("table1").style.visibility = "visible";
+							console.log('正确')
+						}
+					}else{
+						document.getElementById("table1").style.visibility = "hidden";
+						console.log('错误',a,b,c)
+					}
+				}
+			}
+			
+			
+			function jsonOnload(){
+				const xhr = new XMLHttpRequest();
+				xhr.open('GET', 'static/questions6.json');
+				xhr.responseType = 'json';
+				xhr.onload = function() {
+					if (xhr.status === 200) {
+						const data = xhr.response;
+						// Use the JSON data here
+						jsondata = data;
+						setno=getExtract(qNo)
+						console.log(jsondata,'jsondata?',setno)
+						question = jsondata.questions[setno]
+						console.log(question,setno);
+						
+					} else {
+						// Handle any errors here
+						console.error('Error loading JSON file');
+					}
+				};
+				xhr.send();
+			}
+			jsonOnload()
+			
+			
+			// 返回一个不重复的随机数
+			function getExtract(array) {
+				const random = (min, max) => Math.floor(Math.random() * (max - min) + min); //随机数方法
+				let index ;
+				if(array.length==0){
+					console.log(111)
+					array=qNo=[0,1,2]
+					index=random(0, 3); //生成一个从最小值为0 最大值为数组长度的随机数
+					
+				}else{
+					index=random(0, array.length); //生成一个从最小值为0 最大值为数组长度的随机数
+				}
+				return array.splice(index, 1)[0]
+			}
+			
+			
+		
+		</script>
+
+	</head>
+	<body>
+		<div class="tables" id="table1">
+			<table border="1" width="40%" style="background-color: aqua;">
+				<tr>
+					<td align="center">
+						<font size="+3">Yes, you are correct.</font>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div class="buttons" id="mybuttons">
+			<button class="btn" id="button1">Question 1</button>&nbsp;
+			<button class="btn" id="button2">Question 2</button>&nbsp;
+			<button class="btn" id="button3">Question 3</button>&nbsp;
+			<button class="btn" id="button4">Question 4</button>&nbsp;
+			<button class="btn" id="button5">Question 5</button>&nbsp;
+			<button class="btn" id="button6">Question 6</button>&nbsp;
+		</div>
+		<a-scene vr-mode-ui="enabled: false;" renderer="logarithmicDepthBuffer: true;" embedded
+			arjs="trackingMethod: best; sourceType: webcam;debugUIEnabled: false;">
+			<a-assets>
+				<audio preload controls id="sound" visible="false">
+					<source src="static/audio/cl_a_p.mp3" type="audio/mpeg">
+				</audio>
+			</a-assets>
+			<a-entity camera></a-entity>
+		</a-scene>
+	</body>
+	<script>
+		// 存放答案的三个下标
+		var answer;
+		var soundfile;
+		var a = $('#sound')[0]
+		// 答案的三个index
+		//监听按钮
+		$('#mybuttons').on('click',function(e){
+			if($(e.target).hasClass('btn')){
+				let name = $(e.target).attr('id')
+				let index = name.charAt(name.length - 1)
+				console.log(question)
+				// 判断question存在否 todo
+				if(question){
+					answer=question['answer'+index]
+					soundfile=question['soundfile'][index-1]
+					//更换音源。
+					$('#sound').children()[0].setAttribute('src','static/audio/'+soundfile);
+					console.log('音源',$('#sound').children()[0].getAttribute('src'))
+					console.log('点击了按钮',index,'题号=',setno+1,answer,soundfile)
+					a.load()
+					a.play();
+				}else{
+					console.log('还没加载好？再次加载？')
+					jsonOnload()
+				}
+				
+			}
+			// $(e.target).attr('class')[-1]
+		})
+	</script>
+</html>
