@@ -7,6 +7,9 @@
 		<link rel="icon" href="data:;base64,iVBORw0KGgo=">
 		<title>sliver6</title>
 		<style>
+			.wrong{
+				background-color:  #f0ad4e!important;
+			}
 			.buttons {
 				position: absolute;
 				bottom: 50px;
@@ -17,8 +20,11 @@
 				align-items: center;
 				z-index: 10;
 				visibility: visible;
+				flex-wrap: wrap;
 			}
-		
+			.btn{
+				margin-top: 10px ;
+			}
 			.tables {
 				position: absolute;
 				bottom: 100px;
@@ -30,6 +36,55 @@
 				z-index: 10;
 				visibility: hidden;
 			}
+			#score_wrap{
+				width: 200px;
+				height: 200px;
+				position: absolute;
+				top: 10px;
+				right: 5px;
+				border: 1px solid #eee;
+				background-color: rgba(123, 123, 123, 0.3);
+				border-radius: 5px;
+			}
+			#score_wrap table{
+				margin: 5px auto;
+			}
+			#table2{
+				visibility: visible;
+			}
+			#table2,table{
+				border-radius: 10px;
+				font-size: 15px;
+			}
+			#restart,#next{
+				font-size: 15px;
+				padding: 10px;
+				margin-bottom: 10px;
+			}
+			.btn-primary{
+				background-color: #337ab7;
+				border-color: #2e6da4;
+				color: #fff;
+				cursor: pointer;
+			}
+			.btn-default{
+				color: #333;
+				background-color: #fff;
+				border-color: #ccc;
+			}
+			.checkImg{
+				width: 20px;
+				height: 20px;
+				margin-left: 10px;
+			}
+			.title{
+				text-align: center;
+				font-size: 17px;
+				font-weight: bold;
+			}
+			.vhide{
+				visibility: hidden;
+			}
 		</style>
 		<script src="static/js/jquery.min.js"></script>
 		<script src="static/js/aframe.min.js"></script>
@@ -39,16 +94,18 @@
 		<script>
 			var charArr = [];
 			var charArr2 = ['fl', 'pl', 'cl', 'fr', 'sn', 'tw', 'tr', 'gr', 'dr']
+			var answerIndexs = new Array(6).fill(0)
 			var charIndexArr = new Array(35).fill(0); //存放位置
 			var mIdex = 0; //marker_index
 			var jsondata;
 			var question = {}
-			var qNo = [0,1,2]
+			var qNo = [0,1,2]  //从012里随机抽一组
+			var correct_count = 0;
 			var setno;
 			
 			window.onload = function() {
 				var sceneEl = document.querySelector('a-scene');
-				function initScene() {
+				function firstInitScene() {
 					// 26字母
 					for (var i = 0; i < 26; i++) {
 						let char = (String.fromCharCode((65 + i))).toLowerCase()
@@ -66,7 +123,6 @@
 									mark_index = markerId.charAt(markerId.length - 1)
 									
 								}
-								// console.log(markerEl)
 								// 往maker里添加图片实体
 								let el = document.createElement('a-image');
 								el.setAttribute('id', "desc")
@@ -77,21 +133,16 @@
 
 								// 识别成功时执行
 								markerEl.addEventListener('markerFound', function() {
-									// markerVisible[ marker.id ] = true;
 									let marker1Pos = new THREE.Vector3();
 									// 录入放置的位置。
-									console.log('识别到的是:',mark_index,charArr[mark_index])
 									charIndexArr[mark_index] = markerEl.object3D.getWorldPosition(marker1Pos).x
-									// console.log(charIndexArr)
+									console.log('识别到的是:',charArr[mark_index],charIndexArr[mark_index])
 									if(answer){
 										checkAnswer(charIndexArr[answer[0]],charIndexArr[answer[1]],charIndexArr[answer[2]])
 									}
-									
-									
 								});
 								// 离开时执行
 								markerEl.addEventListener('markerLost', function() {
-									// markerVisible[ marker.id ] = false;
 									charIndexArr[mark_index] = 0
 									console.log('markerLost')
 									if(answer){
@@ -104,9 +155,6 @@
 						AFRAME.registerComponent(char + '_img', {
 							init: function() {
 								let img = this.el;
-								console.log(img, img.getAttribute('position'))
-								// img = Attribute('position')
-								// img.setAttribute('position', "0 0.5 0");
 							},
 						});
 						entityEl.setAttribute('marker' + mIdex, '');
@@ -126,9 +174,7 @@
 					// 额外字母
 					for (var j = 0; j < charArr2.length; j++) {
 						let char = charArr2[j]
-						// console.log(char)
 						let entityEl = document.createElement('a-marker');
-						
 						charArr.push(char);
 						// 坑！！！注册组件最好写在scene之前不然也不太会执行啦。
 						AFRAME.registerComponent('marker' + mIdex, {
@@ -140,7 +186,6 @@
 								if(!Number(mark_index)){
 									mark_index = markerId.charAt(markerId.length - 1)
 								}
-								console.log(mark_index,markerId)
 								// 往maker里添加图片实体
 								let el = document.createElement('a-image');
 								el.setAttribute('id', "desc")
@@ -154,9 +199,9 @@
 									// markerVisible[ marker.id ] = true;
 									let marker1Pos = new THREE.Vector3();
 									// 录入放置的位置。
-									console.log('识别到的是:',markerEl)
+									
 									charIndexArr[mark_index] = markerEl.object3D.getWorldPosition(marker1Pos).x
-									console.log(charIndexArr)
+									console.log('识别到的是:',charArr[mark_index],charIndexArr[mark_index])
 									if(answer){
 										checkAnswer(charIndexArr[answer[0]],charIndexArr[answer[1]],charIndexArr[answer[2]])
 									}
@@ -176,9 +221,6 @@
 						AFRAME.registerComponent(char + '_img', {
 							init: function() {
 								let img = this.el;
-								console.log(img, img.getAttribute('position'))
-								// img = Attribute('position')
-								// img.setAttribute('position', "0 0.5 0");
 							},
 						});
 						entityEl.setAttribute('marker' + mIdex, '');
@@ -198,37 +240,74 @@
 				// end
 				}
 				
-				initScene()
+				firstInitScene()
+				
 				function checkAnswer(a,b,c){
-					var status = 0;
-					// console.log(a,b,c,answer)
-					// 其他字母的x要为空，即不要存在非答案以外的字母
+					var status = 0;  	// 标记是否存在多余字母
+					let count =0; //记录存在的字母个数
+				
 					for(i in charIndexArr){
 						if(i==answer[0]||i==answer[1]||i==answer[2]){
-							continue
+							if(charIndexArr[i]!=0){
+								count++;
+							}
 						}else{
 							if(charIndexArr[i]!=0){
-								status = 1
+								status = 1;
+								count++;
 								document.getElementById("table1").style.visibility = "hidden";
-								console.log('存在多余字母',charArr[i])
 							}
 						}
 					}
-					//值都存在
-					if(a!=0&&b!=0&&c!=0&&status==0){
-						//位置正确
-						if(b>a&&c>b){
-							document.getElementById("table1").style.visibility = "visible";
-							console.log('正确')
+					if(count>=3){
+						// 识别个数大于3时候显示tips
+						document.getElementById("table1").style.visibility = "visible";
+						//不存在多余字母时
+						if(status==0){
+							//答案的值都存在
+							if(a!=0&&b!=0&&c!=0){
+								if(b>a && c>b){
+									//位置正确 
+									console.log('正确',a,b,c)
+									$('#table1').find('table').removeClass('wrong') //改变背景颜色
+									$('#table1').find('font').text('Yes,you are correct.')
+									$('.question'+answerIndex+'-text').find('.checkImg')[0].setAttribute('src', "static/correct.png")
+									$('.question'+answerIndex+'-text').removeClass('vhide')
+									if(answerIndexs[answerIndex-1] == 0){
+										answerIndexs[answerIndex-1] = 1;
+										correct_count++;
+										$('#score_wrap').find('.title').text('Result('+correct_count+'/6)')
+									}
+									
+									let flag = 	answerIndexs.indexOf(0)
+									console.log(flag,answerIndexs)
+									if(correct_count==6){
+										//全答对
+										document.getElementById("table1").style.visibility = "hidden";
+										$('#table2').show(300)
+									}
+									return ;
+								}
+							}
+						}
+						console.log('位置错误/存在多余字母',a,b,c,status)
+						$('#table1').find('table').addClass('wrong') //改变背景颜色
+						$('#table1').find('font').text('No,you are wrong.')
+						let qt_el = $('.question'+answerIndex+'-text')
+						// qt_el[0].setAttribute('visible', "true")
+						// 已经回答过且正确后就不改图标了
+						if(qt_el.find('.checkImg')[0].getAttribute('src')=='#'){
+							qt_el.find('.checkImg')[0].setAttribute('src', "static/wrong.png")
+							$('.question'+answerIndex+'-text').removeClass('vhide')
 						}
 					}else{
+						// <3不显示tips
 						document.getElementById("table1").style.visibility = "hidden";
-						console.log('错误',a,b,c)
 					}
+					
 				}
 			}
-			
-			
+					
 			function jsonOnload(){
 				const xhr = new XMLHttpRequest();
 				xhr.open('GET', 'static/questions6.json');
@@ -239,10 +318,7 @@
 						// Use the JSON data here
 						jsondata = data;
 						setno=getExtract(qNo)
-						console.log(jsondata,'jsondata?',setno)
 						question = jsondata.questions[setno]
-						console.log(question,setno);
-						
 					} else {
 						// Handle any errors here
 						console.error('Error loading JSON file');
@@ -251,14 +327,12 @@
 				xhr.send();
 			}
 			jsonOnload()
-			
-			
+					
 			// 返回一个不重复的随机数
 			function getExtract(array) {
 				const random = (min, max) => Math.floor(Math.random() * (max - min) + min); //随机数方法
 				let index ;
 				if(array.length==0){
-					console.log(111)
 					array=qNo=[0,1,2]
 					index=random(0, 3); //生成一个从最小值为0 最大值为数组长度的随机数
 					
@@ -268,17 +342,63 @@
 				return array.splice(index, 1)[0]
 			}
 			
-			
-		
 		</script>
-
 	</head>
 	<body>
+		<!-- score -->
+		<div id="score_wrap" >
+			<table >
+				<tr>
+					<td colspan="2" class="title">Result(0/6)</td>
+				</tr>
+				<tr class="question1-text vhide" >
+					<td>Question1</td>
+					<td><img class="checkImg" src="#"></td>
+				</tr>
+				<tr class="question2-text vhide">
+					<td>Question2</td>
+					<td><img class="checkImg" src="#"></td>
+				</tr>
+				<tr class="question3-text vhide">
+					<td>Question3</td>
+					<td><img class="checkImg" src="#"></td>
+				</tr>
+				<tr class="question4-text vhide">
+					<td>Question4</td>
+					<td><img class="checkImg" src="#"></td>
+				</tr>
+				<tr class="question5-text vhide">
+					<td>Question5</td>
+					<td><img class="checkImg" src="#"></td>
+				</tr>
+				<tr class="question6-text vhide">
+					<td>Question6</td>
+					<td><img class="checkImg" src="#"></td>
+				</tr>
+			</table>
+		</div>
 		<div class="tables" id="table1">
 			<table border="1" width="40%" style="background-color: aqua;">
 				<tr>
 					<td align="center">
 						<font size="+3">Yes, you are correct.</font>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div class="tables" id="table2">
+			<table  width="40%" style="background-color: #e2e2e2;">
+				<tr >
+					<td align="center" colspan="2">
+						<font size="+2">You have completed all the questions.</font>
+					</td>
+				</tr>
+				<tr>
+					<td align="center">
+						<button class="btn btn-default" id="restart">Restart</button>&nbsp;
+					</td>
+					<td align="center">
+						<button class="btn btn-primary" id="next">Next group</button>&nbsp;
 					</td>
 				</tr>
 			</table>
@@ -298,6 +418,7 @@
 					<source src="static/audio/cl_a_p.mp3" type="audio/mpeg">
 				</audio>
 			</a-assets>
+			
 			<a-entity camera></a-entity>
 		</a-scene>
 	</body>
@@ -306,13 +427,14 @@
 		var answer;
 		var soundfile;
 		var a = $('#sound')[0]
+		var answerIndex=0
 		// 答案的三个index
 		//监听按钮
 		$('#mybuttons').on('click',function(e){
 			if($(e.target).hasClass('btn')){
 				let name = $(e.target).attr('id')
 				let index = name.charAt(name.length - 1)
-				console.log(question)
+				answerIndex = index
 				// 判断question存在否 todo
 				if(question){
 					answer=question['answer'+index]
@@ -331,5 +453,28 @@
 			}
 			// $(e.target).attr('class')[-1]
 		})
+		$('#next').on('click',function(){
+			setno=getExtract(qNo)
+			question = jsondata.questions[setno]
+			restart()
+		})
+		$('#restart').on('click',function(){
+			restart()
+		})
+		function restart(){
+			for(let i=1 ;i<7;i++){
+				//答对的题的index
+				answerIndexs[i]=0
+				// 隐藏答案
+				correct_count=0;
+				$('.question'+i+'-text').addClass('vhide')
+				$('.question'+i+'-text').find('.checkImg').attr('src','#')
+				
+			}
+			document.getElementById("table1").style.visibility = "hidden";
+			$('#table2').hide()
+			charIndexArr = new Array(35).fill(0);
+		}
+		restart()
 	</script>
 </html>
